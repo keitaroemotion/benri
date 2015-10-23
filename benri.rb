@@ -5,6 +5,7 @@
 #
 require 'colorize'
 require 'FileUtils'
+require '\copyx\lib\iter.rb'
 
 targetfile = ""
 
@@ -70,6 +71,7 @@ def dispHelpMenu()
     puts "#{appname} [grep]   ... "
     puts "#{appname} [history]   ...  edited file history"
     puts "#{appname} [help]  ... show help"
+    puts "#{appname} [cd]  ... iter"
     puts
 end
 
@@ -231,6 +233,8 @@ when "grep"
     end
     grep dest
     abort
+when "cd"
+    executeIter  ""
 when "edit"
     if $args[0] == nil
         $args[0] = ""
