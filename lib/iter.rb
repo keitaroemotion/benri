@@ -19,14 +19,111 @@ def removeGarbage(link, filename)
         system "del #{garbage2}".gsub("/","\\")
     end
 end
+def doIter(token, hash, links)
+     File.open($config, "r").each do |line|
+         begin
+             lsp = line.split(" ")
+             key = lsp[0]
+             link = lsp[1]
+             comment = ""
+             (2..lsp.size-1).each do |i|
+                 comment += lsp[i]+" "
+             end
+             hash[key] = [link, comment]
+         rescue
+         end
+     end
 
+     hash.keys.each do |k|
+         if ((token == nil) || k.start_with?(token))
+             print "key:"
+             print "#{k}".cyan
+             print "| "
+             print "#{hash[k][1]}".green
+             puts
+         end
+     end
+     if token == ""
+         print "choose key:[c:C_DIR q:quit] "
+         keyfrag     = $stdin.gets.chomp
+         
+
+         case keyfrag
+         when "q"
+             return
+         when "c"
+             link = "c:/"
+             openLink link
+         end
+
+         if keyfrag == ""
+             print "All? [Y/n] "
+             if $stdin.gets.chomp.downcase == "y"
+             else
+                 return 
+                 #executeIter ""
+             end
+         end
+     else
+         keyfrag = token
+     end
+
+     if hash.keys.include? keyfrag
+         links[keyfrag] = hash[keyfrag]
+     else
+         hash.keys.each do |k|
+             if k.start_with? keyfrag
+                 link = hash[k][0]
+                 comm = hash[k][1]
+                 links[k] = [link,  comm]
+             end
+         end
+     end
+
+
+     if links.size == 0
+         puts "LINK IS NIL".red
+         openLink $location_cash
+     elsif links.size > 1
+         i = 0
+         keypair=Array.new
+         links.keys.each do |key|
+             keypair.push key
+             print "#{i}) "
+             print "#{key} ".yellow
+             print "#{links[key][0]}".cyan
+             print "   # ".magenta
+             puts "#{links[key][1]}".magenta
+             i = i + 1
+         end
+         print "which?:[Menu:m] "
+         res = $stdin.gets.chomp
+         if res == "m"
+             return 
+         end
+         res = res.to_i
+         uri = links[keypair[res]][0]
+
+         if uri.start_with? "http"
+            system "start #{uri}"
+         else
+            openLink uri
+         end
+     else
+         if links[links.keys[0]][0].start_with? "http"
+            system "start #{links[links.keys[0]][0]}"
+         else
+            openLink links[links.keys[0]][0]
+         end
+     end
+ end
 
 def openLink(link)
             if ((link == nil) || (link.strip == "") )
                dispPwd link
                print "PRESS ENTER: "
                $stdin.gets.chomp
-               executeIter
+               return 
             end
             puts link.yellow
             if link.start_with? "http"
@@ -49,7 +146,7 @@ def openLink(link)
                              res = $stdin.gets.chomp.downcase
                              case res
                              when "m"
-                                 executeIter ""
+                                 return 
                              when "y"
                                 break 
                              when ".."
@@ -129,8 +226,7 @@ def openLink(link)
                      $location_cash =File.dirname(link)
                      openLink File.dirname(link) 
                   when "m"
-                       executeIter ""
-                       abort
+                      return
                   when "mv"
                        print "Old File Name: ".red
                        old = $stdin.gets.chomp
@@ -175,8 +271,9 @@ def openLink(link)
 
 
 $location_cash = ""
+
+
 def executeIter(oper)
-    begin
         $config = "/Users/sugano-k/Fabrica/Conf/link/list"
         key   = ""
         links = Hash.new
@@ -185,11 +282,13 @@ def executeIter(oper)
         #token = nil
         token = ""
         if oper == ""
-           print "[add link:add previous location:p conf:c search:/[term]]"
+           print "[add link:add previous location:p conf:c search:/[term] q:quit]"
            oper = $stdin.gets.chomp
         end
 
         case oper
+        when "q"
+          return     
         when "c"
           system  "vim #{$config}"
         when "add"
@@ -204,108 +303,15 @@ def executeIter(oper)
           f.puts(data);
           f.close
           puts "added: #{data}"
-          abort
+          executeIter(oper)
         when "p"
           openLink $location_cash
-          abort
+          executeIter(oper)
         else
           token=oper.gsub("/","")
+          doIter token, hash, links
         end
 
-        File.open($config, "r").each do |line|
-            begin
-                lsp = line.split(" ")
-                key = lsp[0]
-                link = lsp[1]
-                comment = ""
-                (2..lsp.size-1).each do |i|
-                    comment += lsp[i]+" "
-                end
-                hash[key] = [link, comment]
-            rescue
-            end
-        end
-
-        hash.keys.each do |k|
-            if ((token == nil) || k.start_with?(token))
-                print "key:"
-                print "#{k}".cyan
-                print "| "
-                print "#{hash[k][1]}".green
-                puts
-            end
-        end
-        if token == ""
-            print "choose key:[c:C_DIR] "
-            keyfrag     = $stdin.gets.chomp
-            if keyfrag == "c"
-                link = "c:/"
-                openLink link
-            end
-
-            if keyfrag == ""
-                print "All? [Y/n] "
-                if $stdin.gets.chomp.downcase == "y"
-                else
-                    executeIter ""
-                end
-            end
-        else
-            keyfrag = token
-        end
-
-        if hash.keys.include? keyfrag
-            links[keyfrag] = hash[keyfrag]
-        else
-            hash.keys.each do |k|
-                if k.start_with? keyfrag
-                    link = hash[k][0]
-                    comm = hash[k][1]
-                    links[k] = [link,  comm]
-                end
-            end
-        end
-
-
-        if links.size == 0
-            puts "LINK IS NIL".red
-            openLink $location_cash
-        elsif links.size > 1
-            i = 0
-            keypair=Array.new
-            links.keys.each do |key|
-                keypair.push key
-                print "#{i}) "
-                print "#{key} ".yellow
-                print "#{links[key][0]}".cyan
-                print "   # ".magenta
-                puts "#{links[key][1]}".magenta
-                i = i + 1
-            end
-            print "which?:[Menu:m] "
-            res = $stdin.gets.chomp
-            if res == "m"
-                executeIter ""
-                abort
-            end
-            res = res.to_i
-            uri = links[keypair[res]][0]
-
-            if uri.start_with? "http"
-               system "start #{uri}"
-            else
-               openLink uri
-            end
-        else
-            if links[links.keys[0]][0].start_with? "http"
-               system "start #{links[links.keys[0]][0]}"
-            else
-                openLink links[links.keys[0]][0]
-            end
-        end
-    rescue
-
-    end
     executeIter ""
 end
 

@@ -1,0 +1,86 @@
+<?php
+/**
+ * CancelDeliveryModel.php
+ *
+ * 2.24 cancelDelivery<br>
+ * FC へ登録されている配信予約を解除します。
+ *
+ * @author    kondo-ma <kondo-ma@gnavi.co.jp>
+ * @category  Mdy
+ * @package   Model_Mdy_Asp_Cuenote
+ * @copyright Gourmet Navigator Inc.
+ * @version   $Id: $
+ *
+ */
+
+/**
+ * ASP用ライブラリ読み込み
+ */
+require_once APPLICATION_PATH . '/models/Mdy/Asp/Cuenote/Model.php';
+
+/**
+ * 2.24 cancelDelivery
+ */
+class Mdy_Asp_Cuenote_CancelDeliveryModel extends Mdy_Asp_Cuenote_Model {
+    
+    /**
+     * 実行コマンド名
+     */
+    CONST COMMAND_NAME = Mdy_Asp_Cuenote_Model::COMMAND_CANCELDELIVERY;
+    /**
+     * 配信番号
+     * @var string
+     */
+    protected $_delivid = "";
+    
+    /**
+     * 実行結果の配信番号を取得
+     * @return string 配信番号
+     */
+    public function getDelivId() {
+        return $this->_delivid;
+    }
+    
+    /**
+     * APIを実行
+     * @param string $delivid 配信番号
+     * @return boolean
+     */
+    public function action($delivid) {
+        // 送信用xmlパラメータの生成
+        $this->_setParameter($delivid);
+        // リクエストを実行
+        try {
+            $this->request(self::COMMAND_NAME);
+            if ($this->getStatusCode() == 1) {
+                // 結果をセット
+                $this->_setResult($this->getResponseBody());
+                return true;
+            }
+            return false;
+        } catch (Mdy_Asp_Cuenote_Exception $e) {
+            throw new Mdy_Asp_Cuenote_Exception($e->getMessage());
+        } catch (Zend_Http_Client_Exception $e) {
+            throw new Mdy_Asp_Cuenote_Exception($e->getMessage());
+        }
+    }
+    
+    /**
+     * パラメータの生成
+     * @param string $delivid 配信番号
+     */
+    private function _setParameter($delivid) {
+        $parameter = '<parameter delivid="'.$delivid.'" />';
+        $this->setSendXmlParameter($parameter);
+    }
+    
+    /**
+     * 結果をセット
+     * @param SimpleXMLElement $body 結果オブジェクト
+     */
+    private function _setResult($body) {
+        // 結果からdelividを取得
+        $this->_delivid = (string)$body->result['delivid'];
+    }
+}
+
