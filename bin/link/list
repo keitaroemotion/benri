@@ -1,0 +1,13 @@
+error-address-doc \\gn-fs11\pad\restaurant\00_share\【contents】\メール配信システム\メール配信システム(5次フェーズ)\エラーアドレス解除画面 
+batch c:/Users/sugano-k/Fabrica/mail/maildelivery_batch maildelivery batch git instilled
+mng c:/Users/sugano-k/Fabrica/mail/maildelivery_mng maildelivery mng
+cal https://www.google.com/calendar/render?tab=mc#main_7 calendar
+mail https://mail.google.com/mail/u/0/#inbox gmail
+gnavi https://sites.google.com/a/gnavi.co.jp/g-portal/Link/system 
+gw https://gnavi-work.appspot.com/ gnavi work working hour input 1
+suspension //gn-fs11/pad/restaurant/00_share/【contents】/メール配信システム/メール配信システム(5次フェーズ)/会員凍結 会員凍結
+kado http://10.21.68.208:8010/ 稼動管理
+kado-regular http://10.21.68.208:8010/input/regular 稼動管理　レギュラー入力
+kado-irregular http://10.21.68.208:8010/input/irregular 稼動管理イレギュラー入力
+mailtest https://test-sec-mng.gndomain.gnavi.co.jp/maildelivery/testapi メール配信テストAPI
+maildist-test-webpage https://test-my.gnavi.co.jp/login/ メール配信用のテストでアカウント作るサイト

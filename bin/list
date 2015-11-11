@@ -1,0 +1,3 @@
+
+batch /Users/sugano-k/Fabrica/mail/maildelivery_batch sugano-k@172.30.80.56:/home/www/guserbat/bin/maildelivery
+api /Users/sugano-k/Fabrica/mail/maildelivery_mng sugano-k@172.30.24.52:/home/www/maildelivery

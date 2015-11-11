@@ -1,0 +1,6 @@
+file_path|/configure/application/modules/batchDefault/controllers/CancelController.php
+file_path|/configure/application/modules/cuenote/controllers/CancelController.php
+target_r|/home/www/guserbat/bin/maildelivery
+target|sugano-k@172.30.80.56:/home/sugano-k/prank
+deploy|false
+file_root|/Users/sugano-k/Fabrica/mail/maildelivery_batch
