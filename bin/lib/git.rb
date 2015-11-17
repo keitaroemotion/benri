@@ -9,8 +9,8 @@ def enlist(list, func, res=Array.new)
       res.push func.call(log)
     end
     return res
-  rescue 
-    puts "\n error at enlist \n"  
+  rescue Error => e
+    puts "\n error at enlist #{e} \n"  
   end
 end
 
@@ -142,43 +142,76 @@ def extractTargetDiff(diff, func, arr=Array.new)
   end
 end
 
-def compareHashes(g, logs)
+def checkOut(g, version)
+  g.log  
+  #return g.checkout(version)
+end
+
+def compareHashes(g, logs, hashes=Array.new)
   begin 
-    dispCommitList(logs)
-    print "Select hashes[space separated:]"
-    res = $stdin.gets.chomp.strip
+    if hashes.size == 0
 
-    idx1 = logs.size-1
-    idx2 = res.to_i 
-    if res.include?(" ")  
-      resSp = res.split(' ')
-      idx1 = resSp[0].to_i
-      idx2 = resSp[1].to_i     
-    end
+      dispCommitList(logs)
+      print "Select hashes[space separated:]"
+      res = $stdin.gets.chomp.strip
 
-    puts 
+      idx1 = logs.size-1
+      idx2 = res.to_i 
+      if res.include?(" ")  
+        resSp = res.split(' ')
+        idx1 = resSp[0].to_i
+        idx2 = resSp[1].to_i     
+      end
 
-    if (idx1 == idx2)
-      puts "\n\nHashes Same!!!\n\n".red
-      return compareHashes(g, logs)
-    end
+      puts 
 
-    print "#{logs[idx1].sha[0..7]} ".cyan
-    puts "| #{logs[idx1].message} ".magenta
+      if (idx1 == idx2)
+        puts "\n\nHashes Same!!!\n\n".red
+        return compareHashes(g, logs)
+      end
+
+      print "#{logs[idx1].sha[0..7]} ".cyan
+      puts "| #{logs[idx1].message} ".magenta
   
-    print "#{logs[idx2].sha[0..7]} ".yellow
-    puts "| #{logs[idx2].message} ".magenta
+      print "#{logs[idx2].sha[0..7]} ".yellow
+      puts "| #{logs[idx2].message} ".magenta
   
-    diff = g.diff(logs[idx1].sha, logs[idx2].sha)
-    return [diff.to_s.split("\n"), diff.stats]
+      diff = g.diff(logs[idx1].sha, logs[idx2].sha)
+      return [diff.to_s.split("\n"), diff.stats, logs[idx1].sha, logs[idx2].sha]
+    else
+      puts
+      puts hashes[0].magenta
+      puts hashes[1].yellow
+      puts
+
+      diff = g.diff(hashes[0], hashes[1])
+      return [diff.to_s.split("\n"), diff.stats, hashes[0], hashes[1]]
+    end
   rescue
     puts "\nError at compareHashes\n"  
   end
 end
 
-def executeGit(args)
-  puts "==========="   
-  working_dir = "/Users/sugano-k/Fabrica/mail/maildelivery_batch"
+
+def gitOpen(dir)
+  Encoding.default_external = 'UTF-8'
+  return Git.open(dir)
+end
+
+def getGitLog(g)
+  Encoding.default_external = 'UTF-8'
+  return enlist(g.log,      Proc.new { |log| log  }) # since.. cond
+end
+
+def getGitBranches(g)
+  return {
+    :local    => enlist(g.branches.local,  Proc.new { |log| log  }),
+    :remotes  => enlist(g.branches.remote, Proc.new { |log| log  })
+  }
+end
+
+def executeGit(working_dir)
+
   if File.exist?(working_dir) == false
     puts "\n\nFile Not Found\n\n".red  
     return  

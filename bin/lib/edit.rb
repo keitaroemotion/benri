@@ -113,10 +113,10 @@ def envim(file, vimapp)
         swpfile1 = "#{dir}/#{swp1}"
         swpfile2 = "#{dir}/#{swp2}"
         if File.exist? swpfile1
-            system "del #{swpfile1}"
+            FileUtils.rm "#{swpfile1}"
         end
         if File.exist? swpfile2
-            system "del #{swpfile2}"
+           FileUtils.rm  " #{swpfile2}"
         end
     rescue
     end
@@ -209,12 +209,13 @@ def executeEdit(argment_inputs, config, vimapp)
                                 puts "[f:functions] "
                                 puts "[s:send]"
                                 puts "[clean]"
+                                puts "[ll: listup dir]"
                                 puts "[g:grep]"
                                 puts "[t: troops]"
                                 puts "[ga:grep all]"
-                                puts "[gadd: git add]".yellow
-                                puts "[grm: git add]".yellow
-                                puts "[gcom: git commit]".yellow
+                                print "[gadd: git add] ".yellow
+                                print "[grm: git add] ".yellow
+                                print "[gcom: git commit] ".yellow
                                 puts "[gpush: git push]".yellow
                                 puts "[se:show encoding]"
                                 puts "[ce:convert encoding]"
@@ -222,6 +223,11 @@ def executeEdit(argment_inputs, config, vimapp)
                                 print "> "
                                 _oper = $stdin.gets.chomp.downcase 
                                 case _oper
+                                when "ll"
+                                  system "start #{File.dirname(file).gsub('/','\\')}" 
+                                when "norm"
+                                   Encoder.encodeDirectory $path_ini
+                                   editFile path, term, config, key, file, vimapp
                                 when "grm"
                                    gitrm $path_ini, file
                                    editFile path, term, config, key, file, vimapp

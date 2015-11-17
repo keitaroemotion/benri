@@ -9,6 +9,12 @@ require 'FileUtils'
 require 'git'
 require 'net/ssh'
 require 'net/scp'
+require 'zlib'
+require 'rubygems/package'
+#gem 'rubyzip'
+#require 'rubyzip'
+require 'zip/zip'
+require 'zip/zipfilesystem'
 
 $appdir = "benri\\bin"
 
@@ -24,11 +30,14 @@ require "\\#{$appdir}\\lib\\troop.rb"
 require "\\#{$appdir}\\lib\\conf.rb"
 require "\\#{$appdir}\\lib\\git.rb"
 require "\\#{$appdir}\\lib\\comment.rb"
-require "\\#{$appdir}\\lib\\vim.rb"
+require "\\#{$appdir}\\lib\\vimx.rb"
 require "\\#{$appdir}\\lib\\rwork.rb"
+require "\\#{$appdir}\\lib\\load.rb"
+require "\\#{$appdir}\\lib\\encode.rb"
 
 config  = "\\#{$appdir}\\list"
 $scpinfo  = "\\#{$appdir}\\scpinfo"
+$channel_cfg = "\\#{$appdir}\\route"
 
 targetfile = ""
 
@@ -64,6 +73,8 @@ def dispHelpMenu()
     puts "#{appname} [git]  ... git"
     puts "#{appname} [comment]  ... comment"
     puts "#{appname} [rwork]  "
+    puts "#{appname} [update]   ... update benri "
+    puts "#{appname} [q]   ... quit app "
     puts
 end
 
@@ -91,6 +102,8 @@ def executeAPI(config)
         optarg = ARGV[1] 
     end
 
+    optarg = optarg.strip.chomp
+
     if optarg.start_with? "/"
       $args[1] = optarg.gsub("/","")  
       executeEdit $args, config, $vim_app
@@ -98,41 +111,48 @@ def executeAPI(config)
     end
 
     case optarg 
+    when "q", "quit", "bye", "exit"
+      abort "\nBye Bye\n".cyan
     when "key"
-        key = getKeyInput config
-        if key != -1
-          puts
-          puts "Congrats! your key is #{key}".green
-          puts 
-        end
+      key = getKeyInput config
+      if key != -1
+        puts
+        puts "Congrats! your key is #{key}".green
+        puts 
+      end
     when "help", "h", "-h"
-        dispHelpMenu
+      dispHelpMenu
     when "history", "his"
-        executeHistory $editlog
+      executeHistory $editlog
+    when "reload"
+      uploadLibraries "/benri/bin/lib", "xxx"
+      downloadLibraries "/benri/bin/lib", "libdirtmp" #not defined
+    when "update"
+      downloadLibraries "/benri/bin/lib", "libdirtmp" #not defined
     when "conf"
-        execConf config
+      execConf config
     when "grep"
-        executeGrep config
+      executeGrep config
     when "cd"
-        executeIter  ""
+      executeIter  ""
     when "edit"
-        executeEdit $args, config, $vim_app
+      executeEdit $args, config, $vim_app
     when "clean"
-        executeClean config
+      executeClean config
     when "scp"
-        executeScpx $groupRootDir, $sshinfo, $vim_app
+      executeScpx $groupRootDir, $sshinfo, $vim_app, $channel_cfg
     when "local"
-        targetfile = optarg
+      targetfile = optarg
     when "rwork"
-         # encoding: UTF-8
-         Encoding.default_external = 'UTF-8'
-         execute_rwork
+     # encoding: UTF-8
+     Encoding.default_external = 'UTF-8'
+     execute_rwork
     when "git"
-        executeGit $args
+      executeGit $args
     when "comment", "com"
-        executeComment config, $vim_app
+      executeComment config, $vim_app
     when "compile", "c"
-        return 
+      return 
     else
     end
     executeAPI config
